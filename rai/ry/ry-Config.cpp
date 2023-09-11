@@ -324,6 +324,20 @@ To get really precise distances and penetrations use the FS.distance feature wit
   pybind11::arg("belowMargin") = 1.
       )
 
+  .def("getCollisionAllPairs", [](shared_ptr<rai::Configuration>& self) {
+    pybind11::list ret;
+    FrameL collisionAllPairs = self->getCollisionAllPairs();
+    for(uint i = 0; i < collisionAllPairs.N / 2; i++) {
+      pybind11::tuple tuple(2);
+      tuple[0] = collisionAllPairs.elem(i * 2)->name.p;
+      tuple[1] = collisionAllPairs.elem(i * 2 + 1)->name.p;
+      ret.append(tuple);
+    }
+    return ret;
+  },
+  "return all possible collision pairs: a list of 2 tuples with (frame1, frame2)"
+      )
+
   .def("view",  &rai::Configuration::view,
        "open a view window for the configuration",
        pybind11::arg("pause")=false,
@@ -367,7 +381,7 @@ reloads, displays and animates the configuration whenever the file is changed"
     return str;
   }
   )
-  
+
   .def("simulation", [](shared_ptr<rai::Configuration>& self, rai::Simulation::Engine engine, int verbose) {
     return make_shared<rai::Simulation>(*self, engine, verbose);
   },
